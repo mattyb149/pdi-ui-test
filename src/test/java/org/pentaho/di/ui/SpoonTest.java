@@ -48,7 +48,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Future;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory .widgetOfType;
 
 /**
  * Created by mburgess on 10/23/15.
