@@ -28,12 +28,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
-import org.pentaho.di.ui.StepDialogTest;
+import org.pentaho.di.ui.trans.step.StepDialogTestBase;
 
 import java.util.concurrent.Callable;
 
 @RunWith( BlockJUnit4ClassRunner.class )
-public class TextFileInputStepDialogTest extends StepDialogTest {
+public class TextFileInputStepDialogTest extends StepDialogTestBase {
   private static Class<?> PKG = TextFileInputMeta.class;
 
   public static final String DIALOG_NAME = "My Dialog";
@@ -56,7 +56,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
     createTest(
       BaseMessages.getString( PKG, "TextFileInputDialog.DialogTitle" ),
       textFileInputDialog,
-      "OK",
+      "OK", // Button to press to dispose the dialog -- OK or Cancel
       null
     );
     assertEquals( DIALOG_NAME, openUI() );
@@ -84,14 +84,14 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
       textFileInputDialog,
       "OK",
       new Callable<Void>() {
-        @Override
+
         public Void call() throws Exception {
-          assertResultGivenInput( "My Step", "My Step" );
+          assertResultGivenInput( "Step name ", "My Step", "My Step" );
           return null;
         }
       } );
     assertEquals( "My Step", openUI() );
-    verifyResults();
+    verifyResults(); // Invokes the callable given above
   }
 
   @Test
@@ -102,9 +102,9 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
       textFileInputDialog,
       "Cancel",
       new Callable<Void>() {
-        @Override
+
         public Void call() throws Exception {
-          assertResultGivenInput( "My Step", "My Step" );
+          assertResultGivenInput( "Step name ", "My Step", "My Step" );
           return null;
         }
       } );
@@ -120,7 +120,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
       textFileInputDialog,
       "OK",
       new Callable<Void>() {
-        @Override
+
         public Void call() throws Exception {
           bot.textWithLabel( BaseMessages.getString( PKG, "TextFileInputDialog.Filename.Label" ) ).setText( "file.txt" );
           assertEquals( "file.txt", bot.textWithLabel( BaseMessages.getString( PKG, "TextFileInputDialog.Filename.Label" ) ).getText() );
@@ -156,7 +156,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
       textFileInputDialog,
       "OK",
       new Callable<Void>() {
-        @Override
+
         public Void call() throws Exception {
           SWTBotTable table = bot.table( 0 );
           assertNotNull( table );

@@ -19,7 +19,7 @@
  * limitations under the License.
  *
  ******************************************************************************/
-package org.pentaho.di.ui;
+package org.pentaho.di.ui.trans.step;
 
 import com.google.common.util.concurrent.SettableFuture;
 import org.eclipse.swt.widgets.Display;
@@ -37,8 +37,8 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepDialogInterface;
+import org.pentaho.di.ui.TestResults;
 import org.pentaho.di.ui.core.PropsUI;
-import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +50,7 @@ import java.util.concurrent.CyclicBarrier;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
-public abstract class StepDialogTest extends SWTBotTestCase {
+public abstract class StepDialogTestBase extends SWTBotTestCase {
 
   protected SWTBot bot;
 
@@ -98,14 +98,13 @@ public abstract class StepDialogTest extends SWTBotTestCase {
     if ( uiThread == null ) {
       uiThread = new Thread( new Runnable() {
 
-        @Override
         public void run() {
           TestResults testResults = new TestResults( true, "" );
           try {
 
             // wait for the test setup
             swtBarrier.await();
-            while ( ( shell = StepDialogTest.this.dialog.getShell() ) == null ) {
+            while ( ( shell = getShell(StepDialogTestBase.this.dialog) ) == null ) {
               Thread.sleep( 100 );
             }
             bot = new SWTBot( shell );
@@ -162,9 +161,12 @@ public abstract class StepDialogTest extends SWTBotTestCase {
     assertTrue( results.getTestMessage(), results.isTestPassed() );
   }
 
-  protected void assertResultGivenInput( String input, String expectedResult ) {
-    bot.textWithLabel( "Step name " ).setText( input );
-    assertEquals( expectedResult, bot.textWithLabel( "Step name " ).getText() );
+  protected void assertResultGivenInput( String textWithLabel, String input, String expectedResult ) {
+    bot.textWithLabel( textWithLabel ).setText( input );
+    assertEquals( expectedResult, bot.textWithLabel( textWithLabel ).getText() );
+  }
+  protected Shell getShell(BaseStepDialog dialog) {
+    return StepDialogTestBase.this.dialog.shell;
   }
 
   private void printWidgets( Shell shell, Class<? extends Widget> clazz ) {
