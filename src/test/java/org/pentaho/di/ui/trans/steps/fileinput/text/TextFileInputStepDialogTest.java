@@ -1,5 +1,27 @@
+/*! ******************************************************************************
+ *
+ * Pentaho Data Integration
+ *
+ * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ *
+ *******************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************/
 package org.pentaho.di.ui.trans.steps.fileinput.text;
 
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,24 +32,21 @@ import org.pentaho.di.ui.StepDialogTest;
 
 import java.util.concurrent.Callable;
 
-/**
- * Created by mburgess on 10/26/15.
- */
 @RunWith( BlockJUnit4ClassRunner.class )
 public class TextFileInputStepDialogTest extends StepDialogTest {
   private static Class<?> PKG = TextFileInputMeta.class;
 
   public static final String DIALOG_NAME = "My Dialog";
 
-  protected TextFileInputDialog dialog;
-  protected TextFileInputMeta meta;
+  protected TextFileInputDialog textFileInputDialog;
+  protected TextFileInputMeta textFileInputMeta;
 
   @Before
   public void setUp() {
-    // synchronize with the thread opening the shell
-    meta = new TextFileInputMeta();
-    meta.setDefault();
-    dialog = new TextFileInputDialog( parent, meta, transMeta, DIALOG_NAME );
+    // Create the objects under test (meta and dialog)
+    textFileInputMeta = new TextFileInputMeta();
+    textFileInputMeta.setDefault();
+    textFileInputDialog = new TextFileInputDialog( parent, textFileInputMeta, transMeta, DIALOG_NAME );
   }
 
 
@@ -36,7 +55,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
 
     createTest(
       BaseMessages.getString( PKG, "TextFileInputDialog.DialogTitle" ),
-      dialog,
+      textFileInputDialog,
       "OK",
       null
     );
@@ -49,7 +68,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
 
     createTest(
       BaseMessages.getString( PKG, "TextFileInputDialog.DialogTitle" ),
-      dialog,
+      textFileInputDialog,
       "Cancel",
       null
     );
@@ -62,7 +81,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
 
     createTest(
       BaseMessages.getString( PKG, "TextFileInputDialog.DialogTitle" ),
-      dialog,
+      textFileInputDialog,
       "OK",
       new Callable<Void>() {
         @Override
@@ -80,7 +99,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
 
     createTest(
       BaseMessages.getString( PKG, "TextFileInputDialog.DialogTitle" ),
-      dialog,
+      textFileInputDialog,
       "Cancel",
       new Callable<Void>() {
         @Override
@@ -98,7 +117,7 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
 
     createTest(
       BaseMessages.getString( PKG, "TextFileInputDialog.DialogTitle" ),
-      dialog,
+      textFileInputDialog,
       "OK",
       new Callable<Void>() {
         @Override
@@ -116,10 +135,47 @@ public class TextFileInputStepDialogTest extends StepDialogTest {
       } );
     openUI();
     verifyResults();
-    String[] filenames = meta.getFileName();
+    String[] filenames = textFileInputMeta.getFileName();
     assertNotNull( filenames );
     assertEquals( 1, filenames.length );
     assertEquals( "file.txt", filenames[0] );
+  }
+
+  @Test
+  public void testDialogContainsPreloadedMetadata() throws Exception {
+    textFileInputMeta.setFileName( new String[]{ "/path/to/files/", "/path/to/other/files/" } );
+    textFileInputMeta.inputFiles.fileMask = new String[]{ ".*", ".*\\.k.." };
+    textFileInputMeta.inputFiles.excludeFileMask = new String[]{ "", ".*\\.ktr" };
+    textFileInputMeta.inputFiles.fileRequired = new String[]{ "Y", "N" };
+    textFileInputMeta.inputFiles.includeSubFolders = new String[]{ "N", "Y" };
+
+    textFileInputDialog = new TextFileInputDialog( parent, textFileInputMeta, transMeta, DIALOG_NAME );
+
+    createTest(
+      BaseMessages.getString( PKG, "TextFileInputDialog.DialogTitle" ),
+      textFileInputDialog,
+      "OK",
+      new Callable<Void>() {
+        @Override
+        public Void call() throws Exception {
+          SWTBotTable table = bot.table( 0 );
+          assertNotNull( table );
+          assertEquals( "/path/to/files/", table.cell( 0, 1 ) );
+          assertEquals( ".*", table.cell( 0, 2 ) );
+          assertEquals( "", table.cell( 0, 3 ) );
+          assertEquals( "Y", table.cell( 0, 4 ) );
+          assertEquals( "N", table.cell( 0, 5 ) );
+
+          assertEquals( "/path/to/other/files/", table.cell( 1, 1 ) );
+          assertEquals( ".*\\.k..", table.cell( 1, 2 ) );
+          assertEquals( ".*\\.ktr", table.cell( 1, 3 ) );
+          assertEquals( "N", table.cell( 1, 4 ) );
+          assertEquals( "Y", table.cell( 1, 5 ) );
+          return null;
+        }
+      } );
+    openUI();
+    verifyResults();
   }
 
 }
