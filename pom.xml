@@ -68,7 +68,7 @@
 	<version>2.19</version>
         <configuration>
           <forkMode>none</forkMode>
-          <workingDirectory>${user.dir}/git/pentaho-kettle/assembly/package-res</workingDirectory>
+          <workingDirectory>target</workingDirectory>
           <argLine>-XstartOnFirstThread</argLine>
         </configuration>
       </plugin>
